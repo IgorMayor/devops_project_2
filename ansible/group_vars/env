@@ -1,0 +1,26 @@
+#Playbook vars
+
+state: "present"
+
+#Common vars
+
+project_tag: "devops project"
+aws_region: "eu-west-2"
+
+#Networking
+
+vpc_name: "projVPC"
+cidr_block: "10.0.0.0/16"
+subnet_cidr: "10.0.1.0/24"
+subnet_name: "projSubnet"
+igw_name: "projIGW"
+route_table_name: "projRT"
+sg_name: "projSG"
+
+# Container
+image: "ami-05abfef2cdbf94bb7" # Ubuntu Server 18.04 LTS
+server_type: "t2.micro"
+keypair: "Ansible"
+server_volume_size: "20"
+server_name: "projServer"
+env: "prod"

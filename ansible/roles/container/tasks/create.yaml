@@ -1,0 +1,41 @@
+- name: Create server
+  amazon.aws.ec2_instance:
+    image_id: "{{ image }}"
+    state: running 
+    wait: true
+    instance_type: "{{ server_type }}"
+    security_group: "{{ sg.group_id }}"
+    vpc_subnet_id: "{{ subnet.subnet.id }}"
+    key_name: "{{ keypair }}"
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          delete_on_termination: true
+          volume_type: gp3
+          volume_size: "{{ server_volume_size }}"
+    exact_count: 1
+    tags:
+      Name: "{{ server_name }}"
+      Environment: "{{ env }}"
+    wait_timeout: 300
+    network:
+      assign_public_ip: true
+
+- name: Gather information about active instance
+  amazon.aws.ec2_instance_info:
+    filters:
+      "tag:Name": "{{ server_name }}"
+      instance-state-name: [ "running"]
+  register: server_ec2
+
+- name: Set ip adress as var
+  set_fact: instance_ip="{{server_ec2.instances[0].network_interfaces[0].association.public_ip}}"
+
+- name: Add server public IP to application host group
+  add_host: hostname={{ instance_ip }} groups=app
+
+- name: Wait for SSH to start using external IP
+  wait_for:
+    host: "{{ instance_ip }}"
+    port: 22
+    timeout: 300

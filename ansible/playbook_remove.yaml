@@ -1,0 +1,41 @@
+# This playbook is the orchestrator 
+
+- name: Main playbook
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - group_vars/env
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+  tasks:
+
+    - name: Install required python packages
+      pip:
+        name:
+        - boto
+        - boto3
+        - botocore
+
+    - name: Use container role
+      include_role:
+        name: container
+      vars:
+        state: absent
+
+    - name: Use networking role
+      include_role:
+        name: networking
+      vars:
+        state: absent
+    
+    - name: Remove server ip file
+      ansible.builtin.file:
+        path: ../server_ip.txt
+        state: absent
+
+    
+
+     
+
+

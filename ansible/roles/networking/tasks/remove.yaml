@@ -1,0 +1,60 @@
+- name: Get vpc details
+  amazon.aws.ec2_vpc_net_info:
+    filters:
+      "tag:Project": "{{ project_tag }}"
+  register: vpc_details
+
+- name: Remove security group
+  amazon.aws.ec2_group:
+    name: "{{sg_name}}"
+    description: "{{ vpc_name }} SG"
+    vpc_id: "{{ vpc_details.vpcs[0].id }}"
+    state: absent
+    rules:
+      - proto: tcp
+        ports:
+        - 80
+        - 22
+        cidr_ip: 0.0.0.0/0
+
+- name: Remove subnet route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_details.vpcs[0].id }}"
+    state: absent
+    tags:
+        Name: "{{route_table_name}}"
+        Project: "{{ project_tag }}"
+
+- name: Remove Internet gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc_details.vpcs[0].id }}"
+    state: absent
+    tags:
+        Name: "{{ igw_name }}"
+        Project: "{{ project_tag }}"
+
+- name: remove subnet
+  amazon.aws.ec2_vpc_subnet:  
+    state: "absent"
+    vpc_id: "{{ vpc_details.vpcs[0].id }}"
+    cidr: "{{ subnet_cidr }}"
+    map_public: yes
+    tags:
+      Name: "{{ subnet_name }}"
+      Project: "{{ project_tag }}"
+    wait: yes
+
+- name: remove VPC
+  amazon.aws.ec2_vpc_net:
+    name: "myVPC"
+    cidr_block: "{{ cidr_block }}"
+    state: "absent"
+    dns_hostnames: yes
+    dns_support: yes
+    multi_ok: no
+    purge_cidrs: True
+    tags:
+      Name: "{{ vpc_name }}"
+      Project: "{{ project_tag }}"
+
+  

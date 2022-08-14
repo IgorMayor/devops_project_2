@@ -1,0 +1,5 @@
+- name: Remove server
+  amazon.aws.ec2_instance:
+    state: absent
+    filters:
+      "tag:Environment": prod

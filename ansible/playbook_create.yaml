@@ -1,0 +1,51 @@
+# Creater network and container 
+
+- name: Create network/instance
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - group_vars/env
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    
+    - name: Install required python packages
+      pip:
+        name:
+        - boto
+        - boto3
+        - botocore
+
+    - name: Use networking role
+      include_role:
+        name: networking 
+
+    - name: Use container role
+      include_role:
+        name: container
+    
+    - name: export ip to file
+      ansible.builtin.copy:
+        content: "{{instance_ip}}"
+        dest: ../server_ip.txt
+
+
+##############################################################
+     
+- name: Connect to instance
+  hosts: app
+  user: ubuntu
+  become: True
+  gather_facts: True
+  vars_files:
+    - group_vars/env
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+  tasks:
+
+    - name: Use connect role
+      include_role:
+        name: connect
+
+    - debug: msg="the current END time is {{ ansible_date_time.iso8601 }}"

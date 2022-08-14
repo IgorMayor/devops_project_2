@@ -1,0 +1,61 @@
+- name: create VPC
+  amazon.aws.ec2_vpc_net:
+    name: "myVPC"
+    cidr_block: "{{ cidr_block }}"
+    state: "present"
+    dns_hostnames: yes
+    dns_support: yes
+    multi_ok: no
+    purge_cidrs: True
+    tags:
+      Name: "{{ vpc_name }}"
+      Project: "{{ project_tag }}"
+  register: vpc
+
+- name: Add subnet to VPC
+  amazon.aws.ec2_vpc_subnet:  
+    state: "present"
+    vpc_id: "{{ vpc.vpc.id }}"
+    cidr: "{{ subnet_cidr }}"
+    map_public: yes
+    tags:
+      Name: "{{ subnet_name }}"
+      Project: "{{ project_tag }}"
+    wait: yes
+  register: subnet
+
+- name: Create Internet gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc.vpc.id }}"
+    state: present
+    tags:
+        Name: "{{ igw_name }}"
+        Project: "{{ project_tag }}"
+  register: igw
+
+- name: Create subnet route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc.vpc.id }}"
+    tags:
+        Name: "{{route_table_name}}"
+        Project: "{{ project_tag }}"
+    subnets:
+      - "{{ subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+  register: route_table
+
+- name: Create security group
+  amazon.aws.ec2_group:
+    name: "{{sg_name}}"
+    description: "{{ vpc_name }} SG"
+    vpc_id: "{{ vpc.vpc.id }}"
+    state: present
+    rules:
+      - proto: tcp
+        ports:
+        - 80
+        - 22
+        cidr_ip: 0.0.0.0/0
+  register: sg
