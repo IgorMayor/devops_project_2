@@ -1,8 +1,8 @@
-- name: Create container resources
+- name: deploy
   import_tasks: create.yaml
   when: state == "present"
 
-- name: Delete container resources
+- name: remove
   import_tasks: remove.yaml
   when: state == "absent"
 
