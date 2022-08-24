@@ -1,6 +1,5 @@
-# This workflow updates the instance
 
-name: Update Instance
+name: Update
 
 on:
   workflow_dispatch:
@@ -13,7 +12,7 @@ on:
 
 
 jobs:
-  updateDockerImage:
+  build:
     runs-on: ubuntu-latest 
     steps:
       
@@ -26,15 +25,15 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: docker image upgrade
+      - name: docker image build
         run: docker build -t ${{ secrets.DOCKER_USER}}/myapp:latest .
       
-      - name: push to DockerHub
+      - name: push to Docker Hub
         run: docker push ${{ secrets.DOCKER_USER }}/myapp:latest
   
-  InstanceUpd:
+  update:
     runs-on: ubuntu-latest 
-    needs: updateDockerImage
+    needs: build
     steps:
       
       - name: Checkout code
@@ -42,10 +41,10 @@ jobs:
 
       - name: Set ip env var
         run: |
-          IP=$(cat server_ip.txt)
+          IP=$(cat ip)
           echo "INSTANCE_IP=$IP" >> $GITHUB_ENV
       
-      - name: Updated instance
+      - name: Update app
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.INSTANCE_IP }}
