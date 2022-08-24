@@ -1,4 +1,4 @@
-- name: Create server
+- name: Create instance
   amazon.aws.ec2_instance:
     image_id: "{{ image }}"
     state: running 
@@ -21,20 +21,20 @@
     network:
       assign_public_ip: true
 
-- name: Gather information about active instance
+- name: Check if another instance is running
   amazon.aws.ec2_instance_info:
     filters:
       "tag:Name": "{{ server_name }}"
       instance-state-name: [ "running"]
   register: server_ec2
 
-- name: Set ip adress as var
+- name: Get public IP
   set_fact: instance_ip="{{server_ec2.instances[0].network_interfaces[0].association.public_ip}}"
 
-- name: Add server public IP to application host group
+- name: set IP to host group
   add_host: hostname={{ instance_ip }} groups=app
 
-- name: Wait for SSH to start using external IP
+- name: wait for ssh connection
   wait_for:
     host: "{{ instance_ip }}"
     port: 22
