@@ -1,20 +1,17 @@
-# This workflow allows us the use to create/remove playbooks
 
 name: Use playbook
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       playbook:
-        description: "which playbook to run"
+        description: "choose playbook"
         required: true
         default: "create"
         type: choice
         options:
         - create
         - remove
-
 
 jobs:
   CreateDockerImage:
@@ -67,13 +64,12 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: ${{ env.playbook }}.yaml
-          # Optional, directory where playbooks live
           directory: ./ansible
       
-      - name: Show server ip file
+      - name: print ip
         if: ${{ inputs.playbook == 'create' }}
         run: |
-          cat server_ip.txt
+          cat ip
 
       - name: commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
