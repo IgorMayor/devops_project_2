@@ -1,8 +1,8 @@
-- name: Create network resources
+- name: set networking
   import_tasks: create.yaml
   when: state == "present"
 
-- name: Delete network resources
+- name: remove networking
   import_tasks: remove.yaml
   when: state == "absent"
 
