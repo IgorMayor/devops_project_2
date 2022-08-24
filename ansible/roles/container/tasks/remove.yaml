@@ -1,4 +1,4 @@
-- name: Remove server
+- name: remove server
   amazon.aws.ec2_instance:
     state: absent
     filters:
