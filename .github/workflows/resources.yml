@@ -1,5 +1,5 @@
 
-name: Use playbook
+name: create/remove
 
 on:
   workflow_dispatch:
