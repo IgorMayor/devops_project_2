@@ -1,4 +1,4 @@
-- name: Create container resources
+- name: deploy
   import_tasks: connect.yaml
 
 
