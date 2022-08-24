@@ -45,4 +45,4 @@
       include_role:
         name: connect
 
-    - debug: msg="the current END time is {{ ansible_date_time.iso8601 }}"
+    - debug: msg="done at {{ ansible_date_time.iso8601 }}"
