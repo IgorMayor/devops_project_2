@@ -1,6 +1,6 @@
-- name: create VPC
+- name: create vpc
   amazon.aws.ec2_vpc_net:
-    name: "myVPC"
+    name: "appvpc"
     cidr_block: "{{ cidr_block }}"
     state: "present"
     dns_hostnames: yes
@@ -12,7 +12,7 @@
       Project: "{{ project_tag }}"
   register: vpc
 
-- name: Add subnet to VPC
+- name: create subnet
   amazon.aws.ec2_vpc_subnet:  
     state: "present"
     vpc_id: "{{ vpc.vpc.id }}"
@@ -24,7 +24,7 @@
     wait: yes
   register: subnet
 
-- name: Create Internet gateway
+- name: create igw
   amazon.aws.ec2_vpc_igw:
     vpc_id: "{{ vpc.vpc.id }}"
     state: present
@@ -33,7 +33,7 @@
         Project: "{{ project_tag }}"
   register: igw
 
-- name: Create subnet route table
+- name: create route table
   amazon.aws.ec2_vpc_route_table:
     vpc_id: "{{ vpc.vpc.id }}"
     tags:
@@ -46,7 +46,7 @@
         gateway_id: "{{ igw.gateway_id }}"
   register: route_table
 
-- name: Create security group
+- name: create security group
   amazon.aws.ec2_group:
     name: "{{sg_name}}"
     description: "{{ vpc_name }} SG"
